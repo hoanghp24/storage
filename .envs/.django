@@ -1,0 +1,12 @@
+DEBUG=1
+SECRET_KEY='django-insecure-iq=^1q@68@tn%lo3gnc%o4p)cd3qj-@p#5tx8ayg_ab5c-hwlu'
+DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+HOST_URL=https://dev-api-storage.pvssolution.com
+
+SQL_ENGINE=django.db.backends.postgresql
+SQL_DATABASE=storage_db
+SQL_USER=storage
+SQL_PASSWORD=storage
+SQL_HOST=db
+SQL_PORT=5432
+DATABASE=postgres

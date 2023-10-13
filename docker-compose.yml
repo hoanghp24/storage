@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    container_name: djangoz01
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/home/app/web/static
+      - media_volume:/home/app/web/media
+    expose:
+      - 8000
+    env_file:
+      - .envs/.django
+    depends_on:
+      - db
+    networks:
+      - djangonetwork
+  db:
+    image: postgres:15.3-alpine
+    container_name: postgresz01
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data_backups:/backups
+    env_file:
+      - .envs/.postgres
+    networks:
+      - djangonetwork
+  nginx:
+    build: ./nginx
+    container_name: nginxz01
+    volumes:
+      - static_volume:/home/app/web/static
+      - media_volume:/home/app/web/media
+    ports:
+      - 8080:80
+      # - 8443:443
+    depends_on:
+      - web
+    networks:
+      - djangonetwork
+  
+  redis:
+    image: "redis"
+    ports:
+      - "6379:6379"
+    networks:
+      - djangonetwork
+
+  worker:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    command: celery -A config.celery worker --loglevel=info
+    volumes:
+      - ./src:/home/app/web
+    env_file:
+      - ./.envs/.django
+    depends_on:
+      - redis
+    networks:
+      - djangonetwork
+  
+  schedule:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    command: celery -A config beat --loglevel=info
+    volumes:
+      - ./src:/home/app/web
+    env_file:
+      - ./.envs/.django
+    depends_on:
+      - redis
+    networks:
+      - djangonetwork
+
+volumes:
+  postgres_data_backups:
+  postgres_data:
+  static_volume:
+  media_volume:
+
+networks:
+  djangonetwork:

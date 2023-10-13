@@ -1,0 +1,3082 @@
+openapi: 3.0.3
+info:
+  title: P-STORAGE API
+  version: 1.0.11
+
+paths:
+  /api/token/:
+    post:
+      operationId: generateToken
+      description: "Generate access token and refresh token"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/request/RequestGenerateTokenPair"
+            example:
+              user_name: admin@gmail.com
+              password: admin123
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 201
+                      data:
+                        $ref: "#/components/schema/response/ResponseGenerateTokenPair"
+          description: "Generated token successfully"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+      tags:
+        - user-api
+
+  /api/token/refresh/:
+    post:
+      operationId: refreshToken
+      description: "Takes a refresh type JSON web token and returns an access type JSON web token if the refresh token is valid."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/request/RequestTokenRefresh"
+            example:
+              refresh: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTYzNDc3ODMxMSwianRpIjoiM2MxMWY0OGZlMTllNDIxY2IyYWY1MTRjZjhhMzQxZGIiLCJ1c2VyX2lkIjoxfQ.cErSzReeXswBjfQIsoTpzxP2_sS_XIXg7FENev82LRo
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 201
+                      data:
+                        type: object
+                        properties:
+                          access:
+                            type: string
+                            format: byte
+                          refresh:
+                            type: string
+                            format: byte
+          description: "Refresh token successfully"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+      tags:
+        - user-api
+
+  /api/supplier/create:
+    post:
+      operationId: create-supplier
+      desciption: "create supplier"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/Supplier"
+
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 201
+                      message_code:
+                        type: string
+                        default: create_data_success
+                      data:
+                        type: object
+                        items:
+                          $ref: "#/components/schema/Supplier"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - supplier-api
+
+  /api/supplier/get:
+    get:
+      operationId: get-supplier
+      desciption: "get supplier"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: string
+        - in: query
+          name: supplier_id
+          required: false
+        - name: search_text
+          in: query
+          description: sku, name, phone
+          required: false
+        - name: limit
+          in: query
+          required: false
+        - name: page
+          in: query
+          required: false
+      responses:
+        "200":
+          description: The Request was successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schema/Supplier"
+                      page_info:
+                        $ref: "#/components/schema/PageInfo"
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - supplier-api
+
+  /api/supplier/update/{supplier_id}:
+    patch:
+      operationId: update-supplier
+      desciption: "update supplier"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: supplier_id
+          in: path
+          required: true
+          type: path
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/Supplier"
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: update_data_success
+                      data:
+                        type: object
+                        items:
+                          $ref: "#/components/schema/Supplier"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - supplier-api
+
+  /api/supplier/delete/{supplier_id}:
+    delete:
+      operationId: delete-supplier
+      desciption: "delete supplier"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: supplier_id
+          in: path
+          required: true
+          type: path
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: delete_data_success
+                      data: []
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - supplier-api
+
+  /api/customer/create:
+    post:
+      operationId: create-customer
+      desciption: "create customer"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/Customer"
+
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 201
+                      message_code:
+                        type: string
+                        default: create_data_success
+                      data:
+                        type: object
+                        items:
+                          $ref: "#/components/schema/Customer"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - customer-api
+
+  /api/customer/get:
+    get:
+      operationId: get-customer
+      desciption: "get customer"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: string
+        - in: query
+          name: customer_id
+          required: false
+        - name: search_text
+          in: query
+          description: sku, name, phone
+          required: false
+        - name: limit
+          in: query
+          required: false
+        - name: page
+          in: query
+          required: false
+      responses:
+        "200":
+          description: The Request was successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schema/Customer"
+                      page_info:
+                        $ref: "#/components/schema/PageInfo"
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - customer-api
+
+  /api/customer/update/{customer_id}:
+    patch:
+      operationId: update-customer
+      desciption: "update customer"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: customer_id
+          in: path
+          required: true
+          type: path
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/Customer"
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: update_data_success
+                      data:
+                        type: object
+                        items:
+                          $ref: "#/components/schema/Customer"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - customer-api
+
+  /api/customer/delete/{customer_id}:
+    delete:
+      operationId: delete-customer
+      desciption: "delete customer"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: customer_id
+          in: path
+          required: true
+          type: path
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: delete_data_success
+                      data: []
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - customer-api
+
+  /api/warehouse/create:
+    post:
+      operationId: create-warehouse
+      desciption: "create warehouse"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/Warehouse"
+
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 201
+                      message_code:
+                        type: string
+                        default: create_data_success
+                      data:
+                        type: object
+                        items:
+                          $ref: "#/components/schema/Warehouse"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - warehouse-api
+
+  /api/warehouse/get:
+    get:
+      operationId: get-warehouse
+      desciption: "get warehouse"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: string
+        - in: query
+          name: warehouse_id
+          required: false
+        - name: search_text
+          in: query
+          description: sku, name
+          required: false
+        - name: start_date
+          in: query
+          description: "(format: YYYY-MM-DD)"
+          required: false
+        - name: end_date
+          description: "(format: YYYY-MM-DD)"
+          in: query
+          required: false
+        - name: limit
+          in: query
+          required: false
+        - name: page
+          in: query
+          required: false
+      responses:
+        "200":
+          description: The Request was successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schema/Warehouse"
+                      page_info:
+                        $ref: "#/components/schema/PageInfo"
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - warehouse-api
+
+  /api/warehouse/update/{warehouse_id}:
+    patch:
+      operationId: update-warehouse
+      desciption: "update warehouse"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: warehouse_id
+          in: path
+          required: true
+          type: path
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/Warehouse"
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: update_data_success
+                      data:
+                        type: object
+                        items:
+                          $ref: "#/components/schema/Warehouse"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - warehouse-api
+
+  /api/warehouse/delete/{warehouse_id}:
+    delete:
+      operationId: delete-warehouse
+      desciption: "delete warehouse"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: warehouse_id
+          in: path
+          required: true
+          type: path
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: delete_data_success
+                      data: []
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - warehouse-api
+
+  /api/warranty/create:
+    post:
+      operationId: create-warranty
+      desciption: "create warranty"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/Warranty"
+
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 201
+                      message_code:
+                        type: string
+                        default: create_data_success
+                      data:
+                        type: object
+                        items:
+                          $ref: "#/components/schema/Warranty"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - warranty-api
+
+  /api/warranty/get:
+    get:
+      operationId: get-warranty
+      desciption: "get warranty"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: string
+        - in: query
+          name: warranty_id
+          required: false
+      responses:
+        "200":
+          description: The Request was successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schema/Warranty"
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - warranty-api
+
+  /api/warranty/update/{warranty_id}:
+    patch:
+      operationId: update-warranty
+      desciption: "update warranty"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: warranty_id
+          in: path
+          required: true
+          type: path
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/Warranty"
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: update_data_success
+                      data:
+                        type: object
+                        items:
+                          $ref: "#/components/schema/Warranty"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - warranty-api
+
+  /api/warranty/delete/{warranty_id}:
+    delete:
+      operationId: delete-warranty
+      desciption: "delete warranty"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: warranty_id
+          in: path
+          required: true
+          type: path
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: delete_data_success
+                      data: []
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - warranty-api
+
+  /api/category/create:
+    post:
+      operationId: create-category
+      desciption: "create category"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                parent:
+                  type: integer
+
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 201
+                      message_code:
+                        type: string
+                        default: create_data_success
+                      data:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          name:
+                            type: string
+                          parent:
+                            type: integer
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - category-api
+
+  /api/category/get:
+    get:
+      operationId: get-category
+      desciption: "get category"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: string
+        - in: query
+          name: parent_id
+          required: false
+        - name: search_text
+          in: query
+          description: name
+          required: false
+        - name: limit
+          in: query
+          required: false
+        - name: page
+          in: query
+          required: false
+          
+      responses:
+        "200":
+          description: The Request was successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schema/Category"
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - category-api
+
+  /api/category/update/{category_id}:
+    patch:
+      operationId: update-category
+      desciption: "update category"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: category_id
+          in: path
+          required: true
+          type: path
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                parent:
+                  type: integer
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: update_data_success
+                      data:
+                        $ref: "#/components/schema/Category"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - category-api
+
+  /api/category/delete/{category_id}:
+    delete:
+      operationId: delete-category
+      desciption: "delete category"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: category_id
+          in: path
+          required: true
+          type: path
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: delete_data_success
+                      data: []
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - category-api
+
+  /api/brand/create:
+    post:
+      operationId: create-brand
+      desciption: "create brand"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/Brand"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 201
+                      message_code:
+                        type: string
+                        default: create_data_success
+                      data:
+                        $ref: "#/components/schema/Brand"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - brand-api
+
+  /api/brand/get:
+    get:
+      operationId: get-brand
+      desciption: "get brand"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: string
+        - in: query
+          name: brand_id
+          required: false
+        - name: search_text
+          in: query
+          description: name
+          required: false
+        - name: limit
+          in: query
+          required: false
+        - name: page
+          in: query
+          required: false
+
+      responses:
+        "200":
+          description: The Request was successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schema/Brand"
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - brand-api
+
+  /api/brand/update/{brand_id}:
+    patch:
+      operationId: update-brand
+      desciption: "update brand"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: brand_id
+          in: path
+          required: true
+          type: path
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schema/Brand"
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: update_data_success
+                      data:
+                        $ref: "#/components/schema/Brand"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - brand-api
+
+  /api/brand/delete/{brand_id}:
+    delete:
+      operationId: delete-brand
+      desciption: "delete brand"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: brand_id
+          in: path
+          required: true
+          type: path
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: delete_data_success
+                      data: []
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - brand-api
+
+  /api/product/create:
+    post:
+      operationId: create-product
+      desciption: "create product"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+          default: 5
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schema/Product"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 201
+                      message_code:
+                        type: string
+                        default: create_data_success
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schema/Product"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - product-api
+
+  /api/product/get:
+    get:
+      operationId: get-product
+      desciption: "get product"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: product_id
+          in: query
+          required: false
+        - name: search_text
+          in: query
+          description: name, sku
+          required: false
+        - name: start_date
+          in: query
+          description: "(format: YYYY-MM-DD)"
+          required: false
+        - name: end_date
+          description: "(format: YYYY-MM-DD)"
+          in: query
+          required: false
+        - name: sortDate
+          description: desc, asc
+          in: query
+          schema:
+            enum: [ASC, DESC]
+          required: false
+        - name: limit
+          in: query
+          required: false
+        - name: page
+          in: query
+          required: false
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        type: array
+                        items:
+                          allOf:
+                            - $ref: "#/components/schema/Product"
+                            - type: object
+                              properties:
+                                category:
+                                  allOf:
+                                    - type: object
+                                      properties:
+                                        id:
+                                          type: integer
+                                        name:
+                                          type: string
+                                        parent:
+                                          type: integer
+                                brand:
+                                  allOf:
+                                    - type: object
+                                      properties:
+                                        id:
+                                          type: integer
+                                        name:
+                                          type: string
+                      page_info:
+                        $ref: "#/components/schema/PageInfo"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - product-api
+
+  /api/product/update/{product_id}:
+    patch:
+      operationId: update-product
+      desciption: "update product"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: product_id
+          in: path
+          required: true
+          type: path
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schema/Product"
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: update_data_success
+                      data:
+                        $ref: "#/components/schema/Product"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - product-api
+
+  /api/product/delete/{product_id}:
+    delete:
+      operationId: delete-product
+      desciption: "delete product"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: product_id
+          in: path
+          required: true
+          type: path
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: delete_data_success
+                      data: []
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - product-api
+
+  /api/product/variant/get:
+    get:
+      operationId: get-product-variant
+      desciption: "get product variant"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: product_id
+          in: query
+          required: false
+        - name: limit
+          in: query
+          required: false
+        - name: page
+          in: query
+          required: false
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        type: array
+                        $ref: "#/components/schema/ProductVariant"
+                      page_info:
+                        $ref: "#/components/schema/PageInfo"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - product-api
+
+  /api/product/variant/update/{variant_id}:
+    patch:
+      operationId: update-product-variant
+      desciption: "update product variant"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: variant_id
+          in: path
+          required: true
+          type: path
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                price:
+                  type: string
+                cost:
+                  type: string
+                discount:
+                  type: integer
+                quantity:
+                  type: integer
+                unit:
+                  type: string
+                is_active:
+                  type: boolean
+                warehouse:
+                  type: integer
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: update_data_success
+                      data:
+                        $ref: "#/components/schema/ProductVariant"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - product-api
+
+  /api/product/variant/delete/{variant_id}:
+    delete:
+      operationId: delete-variant
+      desciption: "delete variant"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: variant_id
+          in: path
+          required: true
+          type: path
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: delete_data_success
+                      data: []
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - product-api
+
+  /api/product/download-excel-template:
+    get:
+      operationId: get-template-product
+      desciption: "get product"
+      security:
+        - BearerAuth: []
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data: []
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - product-api
+
+  /api/purchase-order/create:
+    post:
+      operationId: create-purchase-order
+      desciption: "create purchase-order"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schema/PurchaseOrder"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 201
+                      message_code:
+                        type: string
+                        default: create_data_success
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schema/PurchaseOrder"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - purchase-order-api
+
+  /api/purchase-order/get:
+    get:
+      operationId: get-purchase-order
+      desciption: "get purchase order"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: string
+        - in: query
+          name: purchase_id
+          required: false
+        - name: search_text
+          in: query
+          description: sku of purchase, (phone, sku of supplier)
+          required: false
+        - in: query
+          name: warehouse_id
+          required: false
+        - name: sortDate
+          description: desc, asc
+          in: query
+          schema:
+            enum: [ASC, DESC]
+          required: false
+        - name: start_date
+          in: query
+          description: "(format: YYYY-MM-DD)"
+          required: false
+        - name: end_date
+          description: "(format: YYYY-MM-DD)"
+          in: query
+          required: false
+        - name: limit
+          in: query
+          required: false
+        - name: page
+          in: query
+          required: false
+      responses:
+        "200":
+          description: The Request was successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        $ref: "#/components/schema/PurchaseOrder"
+                      page_info:
+                        $ref: "#/components/schema/PageInfo"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - purchase-order-api
+
+  /api/purchase-order/update/{purchase_id}:
+    patch:
+      operationId: update-purchase-order
+      desciption: "update purchase order"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: purchase_id
+          in: path
+          required: true
+          type: path
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                supplier:
+                  type: integer
+                warehouse:
+                  type: integer
+                note:
+                  type: string
+                invoice:
+                  type: string
+                  format: binary
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: update_data_success
+                      data:
+                        $ref: "#/components/schema/PurchaseOrder"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - purchase-order-api
+
+  /api/purchase-order/delete/{purchase_id}:
+    delete:
+      operationId: delete-purchase-order
+      desciption: "delete purchase-order"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: purchase_id
+          in: path
+          required: true
+          type: path
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: delete_data_success
+                      data: []
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - purchase-order-api
+
+  /api/sale-order/create:
+    post:
+      operationId: create-sale-order
+      desciption: "create sale-order"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schema/SaleOrder"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 201
+                      message_code:
+                        type: string
+                        default: create_data_success
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schema/SaleOrder"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - sale-order-api
+
+  /api/sale-order/get:
+    get:
+      operationId: get-sale-order
+      desciption: "get sale order"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: string
+        - in: query
+          name: sale_id
+          required: false
+        - name: search_text
+          in: query
+          description: sku of sale, (phone, sku of customer)
+          required: false
+        - in: query
+          name: warehouse_id
+          required: false
+        - name: sortDate
+          description: desc, asc
+          in: query
+          schema:
+            enum: [ASC, DESC]
+          required: false
+        - name: start_date
+          in: query
+          description: "(format: YYYY-MM-DD)"
+          required: false
+        - name: end_date
+          description: "(format: YYYY-MM-DD)"
+          in: query
+          required: false
+        - name: limit
+          in: query
+          required: false
+        - name: page
+          in: query
+          required: false
+      responses:
+        "200":
+          description: The Request was successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        $ref: "#/components/schema/SaleOrder"
+                      page_info:
+                        $ref: "#/components/schema/PageInfo"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - sale-order-api
+
+  /api/sale-order/update/{sale_id}:
+    patch:
+      operationId: update-sale-order
+      desciption: "update sale order"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: sale_id
+          in: path
+          required: true
+          type: path
+
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                customer:
+                  type: integer
+                note:
+                  type: string
+                invoice:
+                  type: string
+                  format: binary
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: update_data_success
+                      data:
+                        $ref: "#/components/schema/SaleOrder"
+
+        "400":
+          $ref: "#/components/schema/response/BadRequest"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - sale-order-api
+
+  /api/sale-order/delete/{sale_id}:
+    delete:
+      operationId: delete-sale-order
+      desciption: "delete sale-order"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: integer
+        - name: sale_id
+          in: path
+          required: true
+          type: path
+
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: delete_data_success
+                      data: []
+
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - sale-order-api
+
+  /api/inventory/get:
+    get:
+      operationId: get-inventory
+      desciption: "get inventory"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: string
+        - in: query
+          name: variant_id
+          required: false
+        - in: query
+          name: warehouse_id
+          required: false
+        - name: start_date
+          in: query
+          description: "(format: YYYY-MM-DD)"
+          required: false
+        - name: end_date
+          description: "(format: YYYY-MM-DD)"
+          in: query
+          required: false
+        - name: limit
+          in: query
+          required: false
+        - name: page
+          in: query
+          required: false
+      responses:
+        "200":
+          description: The Request was successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        $ref: "#/components/schema/Inventory"
+                      page_info:
+                        $ref: "#/components/schema/PageInfo"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - inventory-api
+
+  /api/inventory/report/get:
+    get:
+      operationId: get-inventory-report
+      desciption: "get inventory report"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: X-Company-Id
+          in: header
+          required: true
+          type: string
+        - name: start_date
+          in: query
+          description: "(format: YYYY-MM-DD)"
+          required: false
+        - name: end_date
+          description: "(format: YYYY-MM-DD)"
+          in: query
+          required: false
+        - name: limit
+          in: query
+          required: false
+        - name: page
+          in: query
+          required: false
+      responses:
+        "200":
+          description: The Request was successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        $ref: "#/components/schema/InventoryReport"
+                      page_info:
+                        $ref: "#/components/schema/PageInfo"
+        "401":
+          $ref: "#/components/schema/response/Unauthorized"
+        "404":
+          $ref: "#/components/schema/response/NotFound"
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - inventory-api
+
+  /api/enum/get:
+    get:
+      operationId: get-enum
+      desciption: "get enum"
+      responses:
+        "200":
+          description: The Request was successful.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schema/Response"
+                  - type: object
+                    properties:
+                      success:
+                        type: boolean
+                        default: true
+                      status_code:
+                        type: integer
+                        default: 200
+                      message_code:
+                        type: string
+                        default: get_data_success
+                      data:
+                        type: object
+
+        "500":
+          $ref: "#/components/schema/response/InternalServerError"
+      tags:
+        - enum-api
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schema:
+    request:
+      RequestGenerateTokenPair:
+        type: object
+        properties:
+          user_name:
+            type: string
+          password:
+            type: string
+            format: password
+            writeOnly: true
+        required:
+          - user_name
+          - password
+      RequestTokenRefresh:
+        type: object
+        properties:
+          refresh:
+            type: string
+            format: byte
+        required:
+          - refresh
+
+    response:
+      ResponseGenerateTokenPair:
+        type: object
+        properties:
+          access:
+            type: string
+            format: byte
+          refresh:
+            type: string
+            format: byte
+
+      Unauthorized:
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schema/Response"
+                - type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      default: 401
+                    message_code:
+                      type: string
+                      default: unauthorized
+                    data:
+                      type: object
+                      default: []
+
+      NotFound:
+        description: Data not found
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schema/Response"
+                - type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      default: 404
+                    message_code:
+                      type: string
+                      default: not_found
+                    data:
+                      type: object
+                      default: []
+
+      BadRequest:
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schema/Response"
+                - type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      default: 400
+                    message_code:
+                      type: string
+                      default: bad_request
+                    data:
+                      type: object
+                      default: []
+
+      NotAcceptable:
+        description: Not acceptable
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schema/Response"
+                - type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      default: 406
+                    message_code:
+                      type: string
+                      default: not_acceptable
+                    data:
+                      type: object
+                      default: []
+      InternalServerError:
+        description: Internal server error
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "#/components/schema/Response"
+                - type: object
+                  properties:
+                    status_code:
+                      type: integer
+                      default: 500
+                    message_code:
+                      type: string
+                      default: internal_server_error
+                    data:
+                      type: object
+                      default: []
+
+    Profile:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        root_user:
+          type: boolean
+        user:
+          type: object
+          properties:
+            email:
+              type: string
+            user_name:
+              type: string
+            id:
+              type: integer
+              format: int64
+        esignrole:
+          $ref: "#/components/schema/AssetRole"
+
+    AssetRole:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [ASSET_ROLE_ADMIN, ASSET_ROLE_STAFF]
+        description:
+          type: string
+
+    PageInfo:
+      type: object
+      properties:
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        page:
+          type: integer
+
+    Response:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: false
+        message:
+          type: string
+        message_code:
+          type: string
+        status_code:
+          type: integer
+        dev_message:
+          type: string
+
+    Warehouse:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        sku:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        address:
+          type: string
+        is_default:
+          type: boolean
+          default: false
+        is_active:
+          type: boolean
+          default: true
+        created_at:
+          type: string
+          format: datetime
+          readOnly: true
+        updated_at:
+          type: string
+          format: datetime
+          readOnly: true
+
+    Warranty:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          default: Bảo hành 12 tháng
+        term_number:
+          type: integer
+          default: 12
+        term_type:
+          type: string
+          default: MONTH
+        created_at:
+          type: string
+          format: datetime
+          readOnly: true
+        updated_at:
+          type: string
+          format: datetime
+          readOnly: true
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        children:
+          type: array
+          items:
+            allOf:
+              - type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+        created_at:
+          type: string
+          format: datetime
+          readOnly: true
+        updated_at:
+          type: string
+          format: datetime
+          readOnly: true
+
+    Brand:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        created_at:
+          type: string
+          format: datetime
+          readOnly: true
+        updated_at:
+          type: string
+          format: datetime
+          readOnly: true
+
+    Supplier:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        sku:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        created_at:
+          type: string
+          format: datetime
+          readOnly: true
+        updated_at:
+          type: string
+          format: datetime
+          readOnly: true
+
+    Customer:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        sku:
+          type: string
+          readOnly: true
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        created_at:
+          type: string
+          format: datetime
+          readOnly: true
+        updated_at:
+          type: string
+          format: datetime
+          readOnly: true
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        sku:
+          type: string
+        name:
+          type: string
+        barcode:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+            format: binary
+        category:
+          type: integer
+        brand:
+          type: integer
+        warranty:
+          type: integer
+        description:
+          type: string
+        properties:
+          type: object
+          items:  
+            type: object
+            properties:
+              name:
+                type: string
+              value: 
+                type: string
+          example:
+            - name: Kích thước
+              value: ['128Gb', '256Gb']
+        unit:
+          name:
+            type: string
+          value:
+            type: integer
+          example:
+            name: string
+            value: 0
+        variants: 
+          type: object
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              image: 
+                type: string
+              price:
+                type: integer
+              cost:
+                type: integer
+              unit:
+                type: string
+              discount:
+                type: integer
+              quantity:
+                type: integer
+          example:
+            - name: abc
+              image: 'products.jpg'
+              price: 0
+              cost: 0
+              unit: cái
+              discount: 0
+              quantity: 0
+              
+        created_at:
+          type: string
+          format: datetime
+          readOnly: true
+        updated_at:
+          type: string
+          format: datetime
+          readOnly: true
+
+    ProductVariant:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        sku:
+          type: string
+          readOnly: true
+        barcode:
+          type: string
+          readOnly: true
+        barcode_img:
+          type: string
+          readOnly: true
+        price:
+          type: integer
+        cost:
+          type: integer
+        discount:
+          type: integer
+        quantity:
+          type: integer
+        unit:
+          type: string
+        is_active:
+          type: boolean
+        product:
+          type: integer
+        warehouse:
+          type: integer
+        created_at:
+          type: string
+          format: datetime
+          readOnly: true
+        updated_at:
+          type: string
+          format: datetime
+          readOnly: true
+
+    PurchaseOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        user_id:
+          type: integer
+        supplier:
+          type: integer
+        warehouse:
+          type: integer
+        note:
+          type: string
+        payment_method:
+          type: stirng
+          enum: [Tiền mặt, Thẻ tín dụng]
+        discount_amount:
+          type: integer
+        total_quantity:
+          type: integer
+        total_amount:
+          type: string
+        invoices:
+          type: array
+          items:
+            type: string
+            format: binary
+        purchase_details:
+          type: object
+          items:
+            type: object
+            properties:
+              variant:
+                type: integer
+              name:
+                type: string
+              cost:
+                type: integer
+              unit:
+                type: string
+              discount:
+                type: integer
+              quantity:
+                type: integer
+              subtotal:
+                type: string
+          example:
+            - variant: 1
+              name: abc
+              cost: 0
+              unit: cái
+              discount: 0
+              quantity: 0
+              subtotal: 0
+
+        created_at:
+          type: string
+          format: datetime
+          readOnly: true
+        updated_at:
+          type: string
+          format: datetime
+          readOnly: true
+
+    SaleOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        user_id:
+          type: integer
+        customer:
+          type: integer
+        warehouse:
+          type: integer
+        note:
+          type: string
+        payment_method:
+          type: stirng
+          enum: [Tiền mặt, Thẻ tín dụng]
+        invoices:
+          type: array
+          items:
+            type: string
+            format: binary
+        discount_amount:
+          type: integer
+        total_quantity:
+          type: integer
+        total_amount:
+          type: string
+        sale_details:
+          type: object
+          items:
+            type: object
+            properties:
+              variant:
+                type: integer
+              name:
+                type: string
+              price:
+                type: integer
+              unit:
+                type: string
+              discount:
+                type: integer
+              quantity:
+                type: integer
+              subtotal:
+                type: string
+          example:
+            - variant: 1
+              name: abc
+              price: 0
+              unit: cái
+              discount: 0
+              quantity: 0
+              subtotal: 0
+
+        created_at:
+          type: string
+          format: datetime
+          readOnly: true
+        updated_at:
+          type: string
+          format: datetime
+          readOnly: true
+
+    Inventory:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        variant:
+          type: integer
+        created_at:
+          type: string
+          format: datetime
+          readOnly: true
+        updated_at:
+          type: string
+          format: datetime
+          readOnly: true
+
+    InventoryReport:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_id:
+          type: integer
+          readOnly: true
+        inventory_data:
+          type: string
+        onhand_date:
+          type: string
+        onhand_time:
+          type: string
